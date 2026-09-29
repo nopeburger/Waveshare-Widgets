@@ -113,3 +113,5 @@ To add a widget, implement `deck::Widget` from `src/core/widget.h` in a new dire
 Contributors with [Zig](https://ziglang.org/download/) can run the host regression suite with `.\tools\test.ps1`. This runs bundled checks without needing private or live feed captures. Pass `-Zig` with the executable path if it is not on PATH.
 
 The MIT license covers original code and documentation. See [third-party notices](THIRD_PARTY.md) for drivers, logos, data, and test dependencies.
+
+Maintained by [@nopeburger](https://github.com/nopeburger).
