@@ -7,7 +7,11 @@ namespace gas {using ui::Canvas;using ui::Font;using ui::Glyph;using ui::rgb;usi
 namespace gas {
 static const uint16_t Green=rgb(174,234,147),Ink=rgb(255,255,255),Grid=rgb(29,43,34);
 inline void render(Canvas &c,const View &view) {
-  c.clear();c.text(20,16,"CALIFORNIA",fontSmall,Green,2);c.right(260,16,"REGULAR",fontSmall,Ink);
+  c.clear();
+  const int regionLimit=260-c.textWidth("REGULAR",fontSmall)-12;
+  const int regionSpacing=c.textWidth(view.regionName,fontSmall,2)<=regionLimit-20?2:0;
+  c.text(20,16,view.regionName,fontSmall,Green,regionSpacing,regionLimit);
+  c.right(260,16,"REGULAR",fontSmall,Ink);
   c.rect(20,46,240,1,Grid);
   if(!view.history.count) {
     c.text(35,104,"--.---",priceFont,Ink,0,265);

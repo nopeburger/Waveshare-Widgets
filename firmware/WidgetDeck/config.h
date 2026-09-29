@@ -5,6 +5,9 @@
 #ifndef GAS_EIA_API_KEY
 #define GAS_EIA_API_KEY ""
 #endif
+#ifndef GAS_EIA_STATE
+#define GAS_EIA_STATE "CA"
+#endif
 #ifndef GAS_WIFI_SSID
 #define GAS_WIFI_SSID ""
 #endif

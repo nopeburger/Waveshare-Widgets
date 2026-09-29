@@ -5,17 +5,17 @@ Six optional widgets for the **Waveshare ESP32-S3-Touch-AMOLED-1.64 v2**. Choose
 | Widget | Data and setup | Screenshot |
 | --- | --- | --- |
 | Air traffic (`flight`) | ADSB.lol by default; optional local MeshPoint receiver | ![Air traffic demo](screenshots/flight.png) |
-| California gas (`gas`) | EIA; requires your own API key | ![Gas prices](screenshots/gas.png) |
+| Gas Prices (`gas`) | EIA weekly regular gas prices for a selected state; requires your own API key | ![Gas Prices, California example](screenshots/gas.png) |
 | Earthquakes (`earthquake`) | USGS; no key | ![Earthquakes](screenshots/earthquake.png) |
 | California wildfires (`wildfire`) | NIFC; no key | ![Wildfires](screenshots/wildfire.png) |
 | Bambu P1S (`printer`) | Local printer; requires your printer's LAN details | ![Printer demo](screenshots/printer.png) |
 | Space weather (`space`) | NOAA SWPC; no key | ![Space weather](screenshots/space.png) |
 
-Screenshots are renderer captures with public, fictional, or location-neutral empty-state data. Live values and availability vary. The wildfire feed covers California. The printer example is designed for a P1S.
+Screenshots are renderer captures with public, fictional, or location-neutral empty-state data. The gas screenshot shows the default California selection. Live values and availability vary. The wildfire feed covers California. The printer example is designed for a P1S.
 
 ## Hardware and prerequisites
 
-- Waveshare **ESP32-S3-Touch-AMOLED-1.64 v2**, USB data cable, and optionally a FAT32 microSD card.
+- [Waveshare ESP32-S3-Touch-AMOLED-1.64](https://www.waveshare.com/esp32-s3-touch-amoled-1.64.htm) **v2**, USB data cable, and optionally a FAT32 microSD card.
 - [Arduino IDE](https://www.arduino.cc/en/software/) with **esp32 by Espressif Systems 3.3.0**, or [Arduino CLI](https://arduino.github.io/arduino-cli/latest/installation/).
 - A 2.4 GHz Wi-Fi network for live feeds. Offline or missing feeds show a clear setup, cached, or error state.
 
@@ -71,9 +71,17 @@ Brightness percentages must be 1–100; start and end are different minute value
 
 ## Optional service setup
 
-### California gas: your own EIA key
+### Gas Prices: your own EIA key and state
 
-Register for a free personal key on the [EIA Open Data registration page](https://www.eia.gov/opendata/register.php). EIA emails the key to the address you provide. Copy `firmware/WidgetDeck/secrets.example.h` to `secrets.h` in the same directory and set `GAS_EIA_API_KEY` to your key in quotes. Rebuild and upload. Without a key, the gas widget displays **ADD API KEY**. Keep `secrets.h` private; it is ignored by Git. No EIA key is included in this repository.
+Register for a free personal key on the [EIA Open Data registration page](https://www.eia.gov/opendata/register.php). EIA emails the key to the address you provide. Copy `firmware/WidgetDeck/secrets.example.h` to `secrets.h` in the same directory and set `GAS_EIA_API_KEY` to your key in quotes. Set `GAS_EIA_STATE` to one of the state codes below; the default is `"CA"`. For example, `#define GAS_EIA_STATE "NY"` selects New York. Rebuild and upload. Without a key, the gas widget displays **ADD API KEY**. Keep `secrets.h` private; it is ignored by Git. No EIA key is included in this repository.
+
+| Code | State | Code | State | Code | State |
+| --- | --- | --- | --- | --- | --- |
+| `CA` | California | `CO` | Colorado | `FL` | Florida |
+| `MA` | Massachusetts | `MN` | Minnesota | `NY` | New York |
+| `OH` | Ohio | `TX` | Texas | `WA` | Washington |
+
+These are the states in [EIA's weekly regular gasoline price table](https://www.eia.gov/dnav/pet/pet_pri_gnd_a_epmr_pte_dpgal_w.htm); the feed does not publish a weekly state average for every state. An unsupported code produces a build error. The selected state's name appears on the display. Changing states clears the previous state's cached history, so the new state initially shows a loading screen until its EIA data arrives. The bundled offline seed applies only to California.
 
 ### Air traffic: public feed or MeshPoint
 

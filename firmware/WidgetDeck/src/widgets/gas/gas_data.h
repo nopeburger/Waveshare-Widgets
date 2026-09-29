@@ -7,7 +7,23 @@
 
 namespace gas {
 constexpr int MaxPoints=200;
-constexpr const char *Series="EMM_EPMR_PTE_SCA_DPG";
+struct Region {const char *code,*name,*series;};
+constexpr Region Regions[]={
+  {"CA","CALIFORNIA","EMM_EPMR_PTE_SCA_DPG"},
+  {"CO","COLORADO","EMM_EPMR_PTE_SCO_DPG"},
+  {"FL","FLORIDA","EMM_EPMR_PTE_SFL_DPG"},
+  {"MA","MASSACHUSETTS","EMM_EPMR_PTE_SMA_DPG"},
+  {"MN","MINNESOTA","EMM_EPMR_PTE_SMN_DPG"},
+  {"NY","NEW YORK","EMM_EPMR_PTE_SNY_DPG"},
+  {"OH","OHIO","EMM_EPMR_PTE_SOH_DPG"},
+  {"TX","TEXAS","EMM_EPMR_PTE_STX_DPG"},
+  {"WA","WASHINGTON","EMM_EPMR_PTE_SWA_DPG"},
+};
+constexpr bool sameCode(const char *a,const char *b){return *a==*b&&(!*a||sameCode(a+1,b+1));}
+constexpr const Region *regionForCode(const char *code){
+  for(const Region &region:Regions)if(sameCode(region.code,code))return &region;
+  return nullptr;
+}
 struct Date {int year,month,day;};
 inline bool leap(int y){return y%4==0&&(y%100!=0||y%400==0);}
 inline int monthDays(int y,int m){static const int days[]={31,28,31,30,31,30,31,31,30,31,30,31};return days[m-1]+(m==2&&leap(y));}
@@ -45,7 +61,7 @@ inline bool normalize(History &h,int today) {
   h.count=n;return true;
 }
 enum class State {Loading,Current,Cached,Offline,Clock,Error,Setup,MissingKey};
-struct View {History history;State state=State::Loading;int today=0;};
+struct View {History history;State state=State::Loading;int today=0;const char *regionName="CALIFORNIA";};
 struct Scale {float low,high;};
 inline Scale chartScale(const History &h) {
   float low=h.points[0].price,high=low;

@@ -17,21 +17,28 @@
 #include <vector>
 
 static std::string read(const char *path){std::ifstream f(path);std::ostringstream s;s<<f.rdbuf();return s.str();}
-static std::string row(const char *date,const char *value){return std::string("{\"period\":\"")+date+"\",\"series\":\"EMM_EPMR_PTE_SCA_DPG\",\"units\":\"$/GAL\",\"value\":"+value+"}";}
+static std::string row(const char *date,const char *value,const char *series="EMM_EPMR_PTE_SCA_DPG"){return std::string("{\"period\":\"")+date+"\",\"series\":\""+series+"\",\"units\":\"$/GAL\",\"value\":"+value+"}";}
 static std::string response(const std::string &rows){return "{\"response\":{\"data\":["+rows+"]}}";}
-static bool parse(const std::string &json,gas::History &h){return gas::parseFeed(json.data(),json.size(),gas::dayNumber({2026,9,17}),h);}
+static bool parse(const std::string &json,gas::History &h,const char *series="EMM_EPMR_PTE_SCA_DPG"){return gas::parseFeed(json.data(),json.size(),gas::dayNumber({2026,9,17}),series,h);}
 static void ppm(const std::string &path,const uint16_t *p) {
   FILE *file=fopen(path.c_str(),"wb");assert(file);fprintf(file,"P6\n280 456\n255\n");
   for(int i=0;i<280*456;i++){unsigned char rgb[]={static_cast<unsigned char>((p[i]>>11)*255/31),static_cast<unsigned char>(((p[i]>>5)&63)*255/63),static_cast<unsigned char>((p[i]&31)*255/31)};fwrite(rgb,1,3,file);}fclose(file);
 }
 int main(int argc,char **argv) {
   using namespace gas;int day;
+  for(const char *code:{"CA","CO","FL","MA","MN","NY","OH","TX","WA"}){
+    const Region *region=regionForCode(code);assert(region&&strlen(region->name)&&strstr(region->series,"EMM_EPMR_PTE_S")==region->series);
+  }
+  assert(!regionForCode("IL")&&!regionForCode("ca")&&!regionForCode(""));
   assert(parseDate("2024-02-29",day));assert(dateFromDay(day).day==29);assert(dateFromDay(threeYearsBefore(day)).day==28);
   for(const char *bad:{"2023-02-29","2026-13-01","2026-00-01","2026-09-31","2026-9-17","2026-09-17x","1969-01-01"})assert(!parseDate(bad,day));
   for(int year=2000;year<2100;year++)for(int month=1;month<=12;month++){Date d{year,month,monthDays(year,month)},back=dateFromDay(dayNumber(d));assert(d.year==back.year&&d.month==back.month&&d.day==back.day);}
   History h;
   auto good=response(row("2026-09-14","\"5.827\"")+","+row("2026-09-07","5.678")+","+row("2026-08-31","null"));
   assert(parse(good,h)&&h.count==2&&h.points[0].day<h.latest().day&&fabsf(h.latest().price-5.827f)<.0001f);
+  const Region *newYork=regionForCode("NY");auto ny=response(row("2026-09-14","4.339",newYork->series));
+  assert(parse(ny,h,newYork->series)&&h.count==1&&fabsf(h.latest().price-4.339f)<.0001f);
+  assert(!parse(ny,h));assert(!parse(good,h,newYork->series));assert(parse(good,h));
   assert(!parse(good+"garbage",h));assert(!parse(good.substr(0,good.size()-2),h));assert(h.count==2);assert(!parse(response(""),h));
   assert(!parse(response(row("2026-09-21","5.8")),h));
   for(const char *bad:{"\"NaN\"","\"5.2x\"","\"\"","-1","0","101","true","\"Infinity\""})assert(!parse(response(row("2026-09-14",bad)),h));
@@ -46,16 +53,19 @@ int main(int argc,char **argv) {
   assert(sky::parseSettings(settings.data(),settings.size(),wifi)&&!strcmp(wifi.password,"abc#123=def "));
   for(const char *bad:{"ssid=Home\n","ssid=Home\npassword=short\n","ssid=Home\nssid=Other\npassword=abcdefgh\n","ssid=YOUR_WIFI_NAME\npassword=abcdefgh\n"})assert(!sky::parseSettings(bad,strlen(bad),wifi));
   std::vector<uint16_t> pixels(280*456+2,0xdead);Canvas canvas(pixels.data()+1);View view;view.today=dayNumber({2026,9,17});
+  const int regionLimit=260-canvas.textWidth("REGULAR",fontSmall)-12;
+  for(const Region &region:Regions){int spacing=canvas.textWidth(region.name,fontSmall,2)<=regionLimit-20?2:0;assert(canvas.textWidth(region.name,fontSmall,spacing)<=regionLimit-20);}
   auto save=[&](const char *name){render(canvas,view);assert(pixels.front()==0xdead&&pixels.back()==0xdead);if(argc>1)ppm(std::string(argv[1])+"/"+name+".ppm",pixels.data()+1);};
   save("loading");view.state=State::Setup;save("setup");view.state=State::Error;save("error");view.state=State::Offline;save("offline-empty");
   if(argc>2) {
-    std::string live=read(argv[2]);int today=int(std::time(nullptr)/86400);assert(parseFeed(live.data(),live.size(),today,h));assert(h.count>=150&&h.count<=158);
+    std::string live=read(argv[2]);int today=int(std::time(nullptr)/86400);assert(parseFeed(live.data(),live.size(),today,regionForCode("CA")->series,h));assert(h.count>=150&&h.count<=158);
     assert(h.points[0].day>=threeYearsBefore(h.latest().day));
     for(unsigned i=1;i<h.count;i++)assert(h.points[i].day-h.points[i-1].day==7);
     view.today=today;view.history=h;view.state=State::Current;save("live");view.state=State::Offline;save("cached");view.today=h.latest().day+15;save("older");
     printf("Live EIA fixture: %u weekly points; latest %.3f USD/gal.\n",unsigned(h.count),double(h.latest().price));
   }
   view.history.count=1;view.history.points[0]={dayNumber({2026,9,14}),5.0f};save("single-point");
+  view.regionName=regionForCode("MA")->name;save("massachusetts");
   view.history.points[0].price=12.345f;save("wide-price");
   puts("PASS: calendar/leap-year window, schema, units, series, numeric/string prices, missing values, invalid/future dates, order/deduplication, non-destructive failures, cache normalization, SD settings, framebuffer guards.");
 }
