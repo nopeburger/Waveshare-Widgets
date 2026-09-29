@@ -1,0 +1,132 @@
+{
+  "repository": "https://github.com/simple-icons/simple-icons",
+  "commit": "f2365d33171bd1897a41aaae6c0b6e795bcc0483",
+  "icons": [
+    {
+      "code": "UAL",
+      "slug": "unitedairlines",
+      "title": "United Airlines",
+      "source": "https://www.united.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/unitedairlines.svg"
+    },
+    {
+      "code": "AAL",
+      "slug": "americanairlines",
+      "title": "American Airlines",
+      "source": "https://news.aa.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/americanairlines.svg"
+    },
+    {
+      "code": "DAL",
+      "slug": "delta",
+      "title": "Delta",
+      "source": "https://news.delta.com/delta-air-lines-logos-brand-guidelines",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/delta.svg"
+    },
+    {
+      "code": "SWA",
+      "slug": "southwestairlines",
+      "title": "Southwest Airlines",
+      "source": "https://www.southwest.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/southwestairlines.svg"
+    },
+    {
+      "code": "JBU",
+      "slug": "jetblue",
+      "title": "JetBlue",
+      "source": "https://www.jetblue.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/jetblue.svg"
+    },
+    {
+      "code": "ACA",
+      "slug": "aircanada",
+      "title": "Air Canada",
+      "source": "https://www.aircanada.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/aircanada.svg"
+    },
+    {
+      "code": "AFR",
+      "slug": "airfrance",
+      "title": "Air France",
+      "source": "https://www.airfrance.fr",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/airfrance.svg"
+    },
+    {
+      "code": "DLH",
+      "slug": "lufthansa",
+      "title": "Lufthansa",
+      "source": "https://www.lufthansa.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/lufthansa.svg"
+    },
+    {
+      "code": "KLM",
+      "slug": "klm",
+      "title": "KLM",
+      "source": "https://www.klm.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/klm.svg"
+    },
+    {
+      "code": "QFA",
+      "slug": "qantas",
+      "title": "Qantas",
+      "source": "https://www.qantas.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/qantas.svg"
+    },
+    {
+      "code": "SIA",
+      "slug": "singaporeairlines",
+      "title": "Singapore Airlines",
+      "source": "https://www.singaporeair.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/singaporeairlines.svg"
+    },
+    {
+      "code": "JAL",
+      "slug": "japanairlines",
+      "title": "Japan Airlines",
+      "source": "https://www.jal.co.jp",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/japanairlines.svg"
+    },
+    {
+      "code": "UAE",
+      "slug": "emirates",
+      "title": "Emirates",
+      "source": "https://www.emirates.com/ie/english/",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/emirates.svg"
+    },
+    {
+      "code": "THY",
+      "slug": "turkishairlines",
+      "title": "Turkish Airlines",
+      "source": "https://www.turkishairlines.com/en-int/press-room/logo-archive/index.html",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/turkishairlines.svg"
+    },
+    {
+      "code": "CES",
+      "slug": "chinaeasternairlines",
+      "title": "China Eastern Airlines",
+      "source": "https://uk.ceair.com/newCMS/uk/en/content/en_Footer/Support/201904/t20190404_5763.html",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/chinaeasternairlines.svg"
+    },
+    {
+      "code": "CSN",
+      "slug": "chinasouthernairlines",
+      "title": "China Southern Airlines",
+      "source": "https://www.csair.com/en/about/investor/yejibaogao/2020/",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/chinasouthernairlines.svg"
+    },
+    {
+      "code": "FDX",
+      "slug": "fedex",
+      "title": "FedEx",
+      "source": "https://newsroom.fedex.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/fedex.svg"
+    },
+    {
+      "code": "UPS",
+      "slug": "ups",
+      "title": "UPS",
+      "source": "https://www.ups.com",
+      "upstream": "https://raw.githubusercontent.com/simple-icons/simple-icons/f2365d33171bd1897a41aaae6c0b6e795bcc0483/icons/ups.svg"
+    }
+  ]
+}

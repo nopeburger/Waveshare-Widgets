@@ -1,0 +1,8 @@
+# Local MeshPoint receiver for Widget Deck.
+# Enable a viewer account in MeshPoint, then replace the placeholder below.
+# Keep this file private. Values are literal; do not add quotation marks.
+source=meshpoint
+ip=192.168.1.100
+dashboard_port=8080
+receiver_port=8081
+viewer_password=YOUR_VIEWER_PASSWORD

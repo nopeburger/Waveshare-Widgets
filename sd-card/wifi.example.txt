@@ -1,0 +1,11 @@
+# Copy this file to the ROOT of the microSD card and rename it wifi.txt.
+# Replace the two values below. No quotes; use the exact spelling and case.
+# Keep spaces, # and = inside your password as they are.
+# Use a 2.4 GHz Wi-Fi network. Save as plain UTF-8 text.
+ssid=YOUR_WIFI_NAME
+password=YOUR_WIFI_PASSWORD
+
+# Optional location and search radius. Distances are in statute miles.
+latitude=37.7749
+longitude=-122.4194
+radius_miles=15

@@ -1,0 +1,10 @@
+.cache/
+build/
+**/secrets.h
+**/widget_selection.h
+**/display_settings.h
+**/wifi.txt
+**/printer.txt
+**/adsb.txt
+__pycache__/
+*.pyc
