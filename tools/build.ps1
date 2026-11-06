@@ -37,7 +37,12 @@ $config = if ($ConfigFile) { $ConfigFile } else { Join-Path $root '.cache/arduin
 $configArgs = @()
 if (Test-Path -LiteralPath $config) { $configArgs = @('--config-file', $config) }
 $board = 'esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,PSRAM=opi'
-if (!$BuildDirectory) { $BuildDirectory = Join-Path $root ('build/deck-' + (Get-Date -Format 'yyyyMMdd-HHmmss')) }
+# Build outside synced folders (Dropbox can hold generated files open). A fixed
+# path lets arduino-cli reuse unchanged objects, so rebuilds are much faster.
+if (!$BuildDirectory) {
+  $base = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { Join-Path $root 'build' }
+  $BuildDirectory = Join-Path $base 'WidgetDeckBuild/main'
+}
 New-Item -ItemType Directory -Force -Path $BuildDirectory | Out-Null
 & $ArduinoCli compile @configArgs --fqbn $board --build-path $BuildDirectory $sketch
 if ($LASTEXITCODE -ne 0) { throw 'Firmware compilation failed.' }

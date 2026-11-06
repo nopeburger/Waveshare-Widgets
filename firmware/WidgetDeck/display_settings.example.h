@@ -8,3 +8,7 @@
 #define DECK_NIGHT_START_MINUTE (22*60+30)
 #define DECK_NIGHT_END_MINUTE (7*60)
 #define DECK_NIGHT_TOUCH_TIMEOUT_MS 30000
+// 1 = at night the first touch on the dim screen only wakes it (no swipe/tap).
+#define DECK_NIGHT_WAKE_ONLY_TOUCH 1
+// 1 = slowly shift the image up to 2 px to reduce AMOLED burn-in. Off by default.
+#define DECK_PIXEL_SHIFT 0

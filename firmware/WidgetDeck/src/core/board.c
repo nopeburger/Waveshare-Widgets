@@ -50,15 +50,18 @@ void board_init(void) {
   uint8_t normal[]={0,0};
   ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0,0x38,normal,2,pdMS_TO_TICKS(50)));
 }
+static volatile int shift_x,shift_y;
+void board_set_shift(int dx,int dy) {shift_x=dx;shift_y=dy;}
 static void present(const uint16_t *pixels,int scale_shift) {
-  int queued=0;
+  int queued=0,sx0=scale_shift?0:shift_x,sy0=scale_shift?0:shift_y;
   for(int y=0;y<456;y+=STRIPE_ROWS) {
     int rows=(456-y<STRIPE_ROWS)?456-y:STRIPE_ROWS;
     int slot=queued&1;
     if(queued>=2 && xSemaphoreTake(complete,pdMS_TO_TICKS(1000))!=pdTRUE) ESP_ERROR_CHECK(ESP_ERR_TIMEOUT);
     // Panel expects high byte first. Render buffer remains native RGB565.
     for(int py=0;py<rows;py++)for(int x=0;x<280;x++) {
-      uint16_t p=pixels[((y+py)>>scale_shift)*(280>>scale_shift)+(x>>scale_shift)];
+      int srcX=x-sx0,srcY=y+py-sy0;
+      uint16_t p=(srcX<0||srcX>=280||srcY<0||srcY>=456)?0:pixels[(srcY>>scale_shift)*(280>>scale_shift)+(srcX>>scale_shift)];
       stripe[slot][py*280+x]=(p>>8)|(p<<8);
     }
     ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(panel,0,y,280,y+rows,stripe[slot]));

@@ -23,6 +23,7 @@ class Display {
   }
   void begin(){board_brightness(DisplayPolicy::panelValue(policy.percent));applied=policy.percent;}
   void touch(uint32_t now){policy.touch(now);}
+  bool dimmed()const{return policy.dimmed();}
   void tick(uint32_t now){
     time_t epoch=time(nullptr);
     if(epoch!=lastEpoch){

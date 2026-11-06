@@ -69,5 +69,11 @@ int main(){
   custom.settings.nightStart=60;custom.settings.nightEnd=180;
   custom.tick(7000,120);assert(custom.percent==12);
   custom.tick(8000,23*60);assert(custom.percent==70);
+  // dimmed() is true only on the dim overnight screen: not by day, not while
+  // awake, and never when night mode is off.
+  DisplayPolicy d;assert(!d.dimmed());d.tick(0,60);assert(!d.dimmed());
+  d.settings.nightEnabled=true;d.tick(0,60);assert(d.dimmed());
+  d.touch(0);d.tick(0,60);assert(!d.dimmed());
+  d.clearTouch();d.tick(0,720);assert(!d.dimmed());
   puts("PASS: default-off and custom brightness, schedule boundaries, touch timeout, clock corrections, DST repeat, millis rollover.");
 }

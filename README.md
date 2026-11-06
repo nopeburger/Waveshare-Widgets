@@ -66,8 +66,10 @@ The default location is **San Francisco city center, 37.7749, −122.4194**. Cha
 | `DECK_NIGHT_START_MINUTE` | `22*60+30` | Local start time, 22:30 by default. |
 | `DECK_NIGHT_END_MINUTE` | `7*60` | Local end time, 07:00 by default. |
 | `DECK_NIGHT_TOUCH_TIMEOUT_MS` | `30000` | Time after the last touch before dimming resumes. |
+| `DECK_NIGHT_WAKE_ONLY_TOUCH` | `1` | With night mode on, the first touch on the dim screen only wakes it; its swipe, tap or hold is ignored. Set `0` to act on it. |
+| `DECK_PIXEL_SHIFT` | `0` | Set to `1` to slowly shift the image up to 2 pixels (every 2 minutes) to reduce AMOLED burn-in. Content at the very edge is trimmed. |
 
-Brightness percentages must be 1–100; start and end are different minute values from 0–1439. The schedule uses `DECK_TIMEZONE` in `firmware/WidgetDeck/config.h`, which defaults to US Pacific time. Before the clock is known, enabled night mode uses the day brightness. Serial commands `display status`, `display test night`, `display test day`, and `display auto` show or test the configured schedule without changing the system clock. Enable night mode to see dimming during a test. The test override ends after two minutes.
+Brightness percentages must be 1–100; start and end are different minute values from 0–1439. The schedule uses the time zone chosen on the setup page (hold the screen to open it), which defaults to `DECK_TIMEZONE` in `firmware/WidgetDeck/config.h`, US Pacific time. Before the clock is known, enabled night mode uses the day brightness. Serial commands `display status`, `display test night`, `display test day`, and `display auto` show or test the configured schedule without changing the system clock. Enable night mode to see dimming during a test. The test override ends after two minutes.
 
 ## Optional service setup
 

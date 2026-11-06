@@ -21,12 +21,19 @@ static uint32_t renderMs=0,presentMs=0;
 static bool dirty=true,saveSelection=false;
 static char command[640];static size_t commandLength=0;static bool commandOverflow=false;
 
+static std::atomic<bool> screenDimmed{false};
 static void touchTask(void *){
+  bool wasDown=false,wakeOnly=false;
   for(;;){int x=0,y=0,contact=board_touch(&x,&y);if(contact<0)touchErrors++;else touchSamples++;
+    // With DECK_NIGHT_WAKE_ONLY_TOUCH, a touch that starts on the dim overnight
+    // screen only wakes it; its swipe, tap or hold is discarded.
+    if(contact>0&&!wasDown)wakeOnly=DECK_NIGHT_WAKE_ONLY_TOUCH&&screenDimmed.load();
     // Wake on contact, including stationary holds, without waiting for a gesture.
     // The main loop alone writes panel commands, after any frame transfer ends.
     if(contact>0)touchActivity.store(true);
-    deck::Event event=touch.update(contact,x,y,millis());if(event!=deck::Event::None)xQueueSend(gestures,&event,0);
+    deck::Event event=touch.update(contact,x,y,millis());if(event!=deck::Event::None&&!wakeOnly)xQueueSend(gestures,&event,0);
+    if(contact==0)wakeOnly=false;
+    if(contact>=0)wasDown=contact>0;
     vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
@@ -65,13 +72,20 @@ void setup(){
   preferences.begin("widget-deck",false);String saved=preferences.getString("widget","flight");deck::app.select(saved.c_str());
   gestures=xQueueCreate(8,sizeof(deck::Event));assert(gestures);
   if(xTaskCreatePinnedToCore(touchTask,"deck-touch",3072,nullptr,3,nullptr,0)!=pdPASS){Serial.println("Touch task failed.");while(true)delay(1000);}
-  configTzTime(DECK_TIMEZONE,"pool.ntp.org","time.nist.gov");services.begin(GAS_WIFI_SSID,GAS_WIFI_PASSWORD);
+  services.begin(GAS_WIFI_SSID,GAS_WIFI_PASSWORD);configTzTime(services.timezone(),"pool.ntp.org","time.nist.gov");
   for(unsigned i=0;i<deck::app.count;i++)deck::app.widgets[i]->begin(services);
   Serial.println("Widget Deck ready. Left/right: widgets. Up/down: aircraft, earthquakes, wildfires or printer/space pages. Tap: track aircraft / hold quake or fire / refresh gas or space / printer page. Hold: settings.");
 }
 void loop(){
   if(touchActivity.exchange(false))display.touch(millis());
-  display.tick(millis());
+  display.tick(millis());screenDimmed.store(display.dimmed());
+#if DECK_PIXEL_SHIFT
+  { // Move the whole image up to 2 px every 2 minutes, in a slow loop.
+    static const int8_t path[][2]={{0,0},{1,0},{2,1},{1,2},{0,1},{-1,2},{-2,1},{-1,0}};
+    static unsigned lastStep=~0u;unsigned step=(millis()/120000u)%(sizeof(path)/sizeof(path[0]));
+    if(step!=lastStep){lastStep=step;board_set_shift(path[step][0],path[step][1]);dirty=true;}
+  }
+#endif
   uint32_t now=millis();services.tick(now);deck::app.tick(now);
   deck::Event event;while(xQueueReceive(gestures,&event,0)==pdTRUE)dispatch(event);
   while(Serial.available()){

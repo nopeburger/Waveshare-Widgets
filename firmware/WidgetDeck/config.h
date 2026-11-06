@@ -37,6 +37,14 @@
 #ifndef DECK_NIGHT_END_MINUTE
 #define DECK_NIGHT_END_MINUTE (7*60)
 #endif
+// When night mode is on, the first touch on the dim screen only wakes it.
+#ifndef DECK_NIGHT_WAKE_ONLY_TOUCH
+#define DECK_NIGHT_WAKE_ONLY_TOUCH 1
+#endif
+// Slow 2-pixel image shift to reduce AMOLED burn-in (off by default).
+#ifndef DECK_PIXEL_SHIFT
+#define DECK_PIXEL_SHIFT 0
+#endif
 #ifndef DECK_NIGHT_TOUCH_TIMEOUT_MS
 #define DECK_NIGHT_TOUCH_TIMEOUT_MS 30000
 #endif

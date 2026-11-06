@@ -19,6 +19,8 @@ using sky::Home;using sky::validHome;using sky::CardSettings;using sky::loadCard
 class Services {
  public:
   Home home;bool portal=false,setupVisible=false;char apName[32]={},apPassword[12]={};
+  // POSIX time zone chosen on the setup page (defaults to DECK_TIMEZONE).
+  const char *timezone()const{return tz.c_str();}
   SemaphoreHandle_t networkMutex=nullptr;
   Home location(uint32_t &revision){xSemaphoreTake(mutex,portMAX_DELAY);Home h=networkHome;revision=configRevision;xSemaphoreGive(mutex);return h;}
   void toggleSetup(){if(setupVisible){setupVisible=false;return;}openPortal();}
@@ -39,6 +41,7 @@ class Services {
     home.lat=config.getDouble("lat",home.lat);home.lon=config.getDouble("lon",home.lon);home.radius=config.getFloat("radius",home.radius);
     if(!validHome(home))home=Home();
     ssid=config.getString("ssid",fallbackSsid);password=config.getString("pass",fallbackPassword);
+    tz=config.getString("tz",DECK_TIMEZONE);if(!knownZone(tz))tz=DECK_TIMEZONE;
     CardSettings card;card.home=home;
     if(loadCardSettings(card,sdState)){
       bool saved=config.isKey("ssid")&&ssid.length();
@@ -104,7 +107,17 @@ class Services {
   }
  private:
   Preferences config;WebServer server{IPAddress(192,168,4,1),80};SemaphoreHandle_t mutex=nullptr;
-  String ssid,password;Home networkHome;uint32_t configRevision=0;
+  String ssid,password,tz;Home networkHome;
+  struct Zone{const char *name,*posix;};
+  static const Zone *zones(unsigned &count){
+    static const Zone list[]={
+      {"Pacific (US)","PST8PDT,M3.2.0,M11.1.0"},{"Mountain (US)","MST7MDT,M3.2.0,M11.1.0"},{"Arizona (no DST)","MST7"},
+      {"Central (US)","CST6CDT,M3.2.0,M11.1.0"},{"Eastern (US)","EST5EDT,M3.2.0,M11.1.0"},{"Alaska","AKST9AKDT,M3.2.0,M11.1.0"},
+      {"Hawaii","HST10"},{"United Kingdom","GMT0BST,M3.5.0/1,M10.5.0"},{"Central Europe","CET-1CEST,M3.5.0,M10.5.0/3"},
+      {"Japan","JST-9"},{"Sydney","AEST-10AEDT,M10.1.0,M4.1.0/3"}};
+    count=sizeof(list)/sizeof(list[0]);return list;
+  }
+  static bool knownZone(const String &posix){unsigned n;const Zone *z=zones(n);for(unsigned i=0;i<n;i++)if(posix==z[i].posix)return true;return false;}uint32_t configRevision=0;
   uint32_t startedAt=0,applyAt=0,applyCompleteAt=0,scanAt=0;
   bool scanning=false;
   volatile uint8_t disconnectReason=0;
@@ -120,8 +133,12 @@ class Services {
   static bool parseDouble(const String &s,double &v){if(!s.length())return false;char *end;v=strtod(s.c_str(),&end);return end!=s.c_str()&&*end==0&&isfinite(v);}
   void setupRoutes() {
     server.on("/",HTTP_GET,[this](){
-      String page=R"HTML(<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Widget Deck setup</title><style>*{box-sizing:border-box}body{margin:0;background:#080e12;color:#e5edef;font:16px/1.5 system-ui}main{max-width:460px;margin:40px auto;padding:24px}small{color:#ffbc69;letter-spacing:.2em}h1{font-size:38px;font-weight:500;letter-spacing:-.04em}p{color:#98aeb8}label{display:block;margin:18px 0 6px}input,button{width:100%;padding:13px;border-radius:8px;border:1px solid #33434c;background:#111c23;color:inherit;font:inherit}button{margin-top:28px;background:#ffbc69;color:#14100b;border:0;font-weight:600}.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style><main><small>WIDGET DECK</small><h1>Connect your widgets.</h1><p>Connect the display to a 2.4 GHz Wi-Fi network. Your settings stay on this device.</p><form method="post" action="/save"><label>Wi-Fi network</label><input name="ssid" required maxlength="32" autocomplete="off" value=")HTML";
-      page+=html(ssid)+"\"><label>Wi-Fi password</label><input type=\"password\" name=\"password\" maxlength=\"63\" autocomplete=\"new-password\"><p>Leave blank to keep the password for the same network.</p><div class=\"pair\"><div><label>Latitude</label><input name=\"lat\" type=\"number\" step=\"any\" min=\"-90\" max=\"90\" required value=\""+String(home.lat,7)+"\"></div><div><label>Longitude</label><input name=\"lon\" type=\"number\" step=\"any\" min=\"-180\" max=\"180\" required value=\""+String(home.lon,7)+"\"></div></div><label>Search radius (miles)</label><input type=\"number\" name=\"radius\" min=\"1\" max=\"50\" step=\"1\" required value=\""+String(home.radius,0)+"\"><input type=\"hidden\" name=\"token\" value=\""+token+"\"><button>Save and connect</button></form><p>Saved setup survives restart. Editing wifi.txt on the SD card replaces these settings at the next restart.</p><p>Aircraft data: ADSB.lol (ODbL). Only your search coordinates are sent to the aircraft service.</p></main></html>";
+      String page=R"HTML(<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Widget Deck setup</title><style>*{box-sizing:border-box}body{margin:0;background:#080e12;color:#e5edef;font:16px/1.5 system-ui}main{max-width:460px;margin:40px auto;padding:24px}small{color:#ffbc69;letter-spacing:.2em}h1{font-size:38px;font-weight:500;letter-spacing:-.04em}p{color:#98aeb8}label{display:block;margin:18px 0 6px}input,button{width:100%;padding:13px;border-radius:8px;border:1px solid #33434c;background:#111c23;color:inherit;font:inherit}button{margin-top:28px;background:#ffbc69;color:#14100b;border:0;font-weight:600}.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style><main><small>WIDGET DECK</small><h1>Connect your widgets.</h1><p>Connect the display to a 2.4 GHz Wi-Fi network. Your settings stay on this device.</p><p id="st">Status: )HTML";
+      page+=WiFi.status()==WL_CONNECTED?"connected to "+html(WiFi.SSID())+" ("+String(WiFi.RSSI())+" dBm), clock "+(time(nullptr)>1700000000?"set":"waiting"):String("not connected to home Wi-Fi");
+      page+=R"HTML(</p><form method="post" action="/save"><label>Wi-Fi network</label><input name="ssid" required maxlength="32" autocomplete="off" value=")HTML";
+      page+=html(ssid)+"\"><label>Wi-Fi password</label><input type=\"password\" name=\"password\" maxlength=\"63\" autocomplete=\"new-password\"><p>Leave blank to keep the password for the same network.</p><div class=\"pair\"><div><label>Latitude</label><input name=\"lat\" type=\"number\" step=\"any\" min=\"-90\" max=\"90\" required value=\""+String(home.lat,7)+"\"></div><div><label>Longitude</label><input name=\"lon\" type=\"number\" step=\"any\" min=\"-180\" max=\"180\" required value=\""+String(home.lon,7)+"\"></div></div><label>Search radius (miles)</label><input type=\"number\" name=\"radius\" min=\"1\" max=\"50\" step=\"1\" required value=\""+String(home.radius,0)+"\"><label>Time zone (sets the overnight dimming schedule)</label><select name=\"tz\" style=\"width:100%;padding:13px;border-radius:8px;border:1px solid #33434c;background:#111c23;color:inherit;font:inherit\">";
+      {unsigned n;const Zone *z=zones(n);for(unsigned i=0;i<n;i++){page+="<option value=\""+String(i)+"\""+(tz==z[i].posix?" selected":"")+">"+z[i].name+"</option>";}}
+      page+=String("</select><input type=\"hidden\" name=\"token\" value=\"")+token+"\"><button>Save and connect</button></form><p>Saved setup survives restart. Editing wifi.txt on the SD card replaces these settings at the next restart.</p><p>Aircraft data: ADSB.lol (ODbL). Only your search coordinates are sent to the aircraft service.</p></main></html>";
       server.sendHeader("Cache-Control","no-store");server.send(200,"text/html",page);
     });
     server.on("/save",HTTP_POST,[this](){
@@ -129,6 +146,8 @@ class Services {
       double lat,lon,radius;String nextSsid=server.arg("ssid"),nextPass=server.arg("password");
       if(!parseDouble(server.arg("lat"),lat)||!parseDouble(server.arg("lon"),lon)||!parseDouble(server.arg("radius"),radius)||!validHome(Home{lat,lon,float(radius)})||!nextSsid.length()||nextSsid.length()>32||nextPass.length()>63||(nextPass.length()>0&&nextPass.length()<8)) {server.send(400,"text/plain","Check coordinates, radius (1-50 miles), network name and password (8-63 characters or blank).");return;}
       if(nextSsid==ssid&&!nextPass.length())nextPass=password;
+      {unsigned n;const Zone *z=zones(n);long pick=server.arg("tz").toInt();
+       if(server.hasArg("tz")&&pick>=0&&pick<long(n)&&tz!=z[pick].posix){tz=z[pick].posix;config.putString("tz",tz);configTzTime(tz.c_str(),"pool.ntp.org","time.nist.gov");}}
       ssid=nextSsid;password=nextPass;home={lat,lon,float(radius)};
       config.putString("ssid",ssid);config.putString("pass",password);config.putDouble("lat",lat);config.putDouble("lon",lon);config.putFloat("radius",home.radius);
       xSemaphoreTake(mutex,portMAX_DELAY);networkHome=home;++configRevision;xSemaphoreGive(mutex);

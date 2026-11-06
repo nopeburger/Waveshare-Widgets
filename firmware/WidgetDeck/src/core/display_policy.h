@@ -19,6 +19,9 @@ struct DisplayPolicy {
     if(settings.nightStart<settings.nightEnd)return minute>=settings.nightStart&&minute<settings.nightEnd;
     return minute>=settings.nightStart||minute<settings.nightEnd;
   }
+  // True while the screen is at its dim overnight level. The first touch then
+  // only wakes the screen instead of also triggering a swipe, tap or hold.
+  bool dimmed()const{return night&&!awake;}
   static uint8_t panelValue(uint8_t percent){return (uint16_t(percent)*255+50)/100;}
   void touch(uint32_t now){touchedAt=now;awake=true;}
   void clearTouch(){awake=false;}
