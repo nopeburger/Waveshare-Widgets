@@ -87,9 +87,20 @@ int main(int argc,char **argv) {
   assert(role(identitySample("\"emergency\":7700"))==Role::Standard);
   assert(!airline(identitySample("\"flight\":\"UAL12\",\"dbFlags\":1")));
   assert(!airline(identitySample("\"flight\":\"UAL12\",\"emergency\":\"lifeguard\"")));
-  for(const char *type:{"B06","EC45","H60","S70"}){Aircraft a;strcpy(a.type,type);assert(silhouette(a)==2);}
-  for(const char *type:{"C206","GA8","BE20","C130","AT8T"}){Aircraft a;strcpy(a.type,type);assert(silhouette(a)==1);}
-  Aircraft lightJet;strcpy(lightJet.type,"C510");strcpy(lightJet.category,"A1");assert(silhouette(lightJet)==0);
+  auto shapeOf=[](const char *type,const char *category=""){Aircraft a;strcpy(a.type,type);strcpy(a.category,category);return silhouette(a);};
+  for(const char *type:{"B06","EC45","H60","S70"})assert(shapeOf(type)==Helicopter);
+  assert(shapeOf("","A7")==Helicopter);
+  for(const char *type:{"C206","GA8","AT8T","C172","SR22","PC12"})assert(shapeOf(type)==LightProp);
+  for(const char *type:{"B738","A320","A21N","B752","B38M"})assert(shapeOf(type)==NarrowJet);
+  for(const char *type:{"B77W","B789","A359","A333","B763"})assert(shapeOf(type)==WideJet);
+  for(const char *type:{"B744","B748","A388","C17"})assert(shapeOf(type)==QuadJet);
+  for(const char *type:{"E175","CRJ7","E190","E145"})assert(shapeOf(type)==RegionalJet);
+  for(const char *type:{"C510","C25A","GLF5","FA7X","E55P"})assert(shapeOf(type,"A1")==BusinessJet);
+  for(const char *type:{"BE20","AT72","DH8D","BE58","B190"})assert(shapeOf(type)==Turboprop);
+  for(const char *type:{"C130","C30J","P3","A400"})assert(shapeOf(type)==Transport);
+  // Unknown types fall back to the ADS-B emitter category.
+  assert(shapeOf("ZZZZ","A1")==LightProp&&shapeOf("ZZZZ","A2")==RegionalJet&&shapeOf("ZZZZ","A3")==NarrowJet);
+  assert(shapeOf("ZZZZ","A4")==NarrowJet&&shapeOf("ZZZZ","A5")==WideJet&&shapeOf("")==NarrowJet);
 #endif
 
   std::vector<uint16_t> memory(Width*Height+2,0xdead);Canvas canvas(memory.data()+1);

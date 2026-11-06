@@ -89,6 +89,10 @@ These are the states in [EIA's weekly regular gasoline price table](https://www.
 
 The **default is the original web-based ADSB.lol feed**. Select `flight`, provide Wi-Fi and location, and no ADS-B account or extra file is needed. The display queries nearby aircraft through HTTPS. The range is set by `radius_miles`. Public positions expire after 60 seconds and the screen identifies stale data.
 
+The aircraft illustration is a simple plan-view silhouette chosen from the ICAO type code (or the ADS-B emitter category when the type is unknown): narrow-body jet, wide-body jet, four-engine jet, regional jet, business jet, twin turboprop, four-engine turboprop, light propeller plane and helicopter. They show the right class and proportions, not an exact model.
+
+![Aircraft silhouettes](screenshots/aircraft-types.png)
+
 To use a **local MeshPoint ADS-B receiver**, first start its ADS-B listener and enable a `viewer` account in MeshPoint. Copy `adsb.example.txt` to the display SD card root as `adsb.txt`; set the Pi's private IPv4 address, dashboard and receiver ports, and viewer password. Restart the display. MeshPoint data travels over local Wi-Fi, not Meshtastic radio. The widget polls the receiver's `data.json` and the dashboard status endpoint; it also uses ADSB.lol for optional aircraft identity metadata when internet is available. It does not substitute public positions when the local receiver is unavailable. The regional airport list used for automatic circling detection is Bay Area specific; update `sky_airports.h` if you need that feature elsewhere.
 
 Alternatively, keep `adsb.txt` off the card and provision over USB after filling a private local copy:
